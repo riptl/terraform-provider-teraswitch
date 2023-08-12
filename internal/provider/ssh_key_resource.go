@@ -42,7 +42,7 @@ func (s *SshKeyResource) Metadata(ctx context.Context, req resource.MetadataRequ
 
 func (s *SshKeyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Creates and manages TeraSwitch Cloud Compute servers.",
+		MarkdownDescription: "Creates and manages SSH keys for TeraSwitch servers.",
 
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{

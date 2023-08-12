@@ -3,12 +3,12 @@
 page_title: "teraswitch_ssh_key Resource - terraform-provider-teraswitch"
 subcategory: ""
 description: |-
-  Creates and manages TeraSwitch Cloud Compute servers.
+  Creates and manages SSH keys for TeraSwitch servers.
 ---
 
 # teraswitch_ssh_key (Resource)
 
-Creates and manages TeraSwitch Cloud Compute servers.
+Creates and manages SSH keys for TeraSwitch servers.
 
 
 
@@ -22,5 +22,5 @@ Creates and manages TeraSwitch Cloud Compute servers.
 
 ### Read-Only
 
-- `id` (String) The ID of the SSH key
+- `id` (Number) The ID of the SSH key
 - `project_id` (Number) The ID of the project the SSH key belongs to
