@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/teraswitch/terraform-provider-teraswitch/internal/tsw"
 )
 
 // Ensure TSWProvider satisfies various provider interfaces.
@@ -27,6 +28,8 @@ type TSWProvider struct {
 // TSWProviderModel describes the provider data model.
 type TSWProviderModel struct {
 	Endpoint types.String `tfsdk:"endpoint"`
+	ApiToken types.String `tfsdk:"api_token"`
+	//ProjectId types.Int64  `tfsdk:"project_id"`
 }
 
 func (p *TSWProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -41,6 +44,15 @@ func (p *TSWProvider) Schema(ctx context.Context, req provider.SchemaRequest, re
 				MarkdownDescription: "TeraSwitch API URL",
 				Optional:            true,
 			},
+			"api_token": schema.StringAttribute{
+				Required:            true,
+				Sensitive:           true,
+				MarkdownDescription: "TeraSwitch REST API token",
+			},
+			//"project_id": schema.Int64Attribute{
+			//	Required:            true,
+			//	MarkdownDescription: "TeraSwitch project ID",
+			//},
 		},
 	}
 }
@@ -50,21 +62,26 @@ func (p *TSWProvider) Configure(ctx context.Context, req provider.ConfigureReque
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
+	endpoint := data.Endpoint.ValueString()
+	if endpoint == "" {
+		endpoint = "https://api.tsw.io"
+	}
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
-
-	// Example client configuration for data sources and resources
-	client := http.DefaultClient
+	httpClient := http.DefaultClient
+	client := tsw.NewClient(httpClient, endpoint, data.ApiToken.ValueString())
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
 
 func (p *TSWProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		//NewComputeInstanceResource,
+		NewSshKeyResource,
+	}
 }
 
 func (p *TSWProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
