@@ -79,7 +79,7 @@ func (p *TSWProvider) Configure(ctx context.Context, req provider.ConfigureReque
 
 func (p *TSWProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		//NewComputeInstanceResource,
+		NewComputeInstanceResource,
 		NewSshKeyResource,
 	}
 }
