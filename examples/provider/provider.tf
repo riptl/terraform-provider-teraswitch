@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    teraswitch = {
+      source = "teraswitch/teraswitch"
+    }
+  }
+}
+
 provider "teraswitch" {
-  # example configuration here
+  # https://beta.tsw.io/ => Settings => Developer
+  api_token = "... YOUR TOKEN HERE ..."
 }
