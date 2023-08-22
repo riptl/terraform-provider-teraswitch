@@ -30,13 +30,16 @@ type ComputeInstanceResource struct {
 }
 
 type ComputeInstanceModel struct {
-	Id        types.Int64  `tfsdk:"id"`
-	ProjectId types.Int64  `tfsdk:"project_id"`
-	Region    types.String `tfsdk:"region"`
-	TierId    types.String `tfsdk:"tier_id"`
-	ImageId   types.String `tfsdk:"image_id"`
-	//Tags        types.List   `tfsdk:"tags"`
-	IpAddresses types.List `tfsdk:"ip_addresses"`
+	Id          types.Int64  `tfsdk:"id"`
+	ProjectId   types.Int64  `tfsdk:"project_id"`
+	DisplayName types.String `tfsdk:"display_name"`
+	Region      types.String `tfsdk:"region"`
+	TierId      types.String `tfsdk:"tier_id"`
+	ImageId     types.String `tfsdk:"image_id"`
+	Tags        types.List   `tfsdk:"tags"`
+	IpAddresses types.List   `tfsdk:"ip_addresses"`
+	SshKeyIds   types.List   `tfsdk:"ssh_key_ids"`
+	BootSize    types.Int64  `tfsdk:"boot_size"`
 }
 
 func (c *ComputeInstanceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -56,6 +59,10 @@ func (c *ComputeInstanceResource) Schema(ctx context.Context, req resource.Schem
 				Computed:            true,
 				MarkdownDescription: "The ID of the project the server belongs to",
 			},
+			"display_name": schema.StringAttribute{
+				Required:            true,
+				MarkdownDescription: "The display name of the server",
+			},
 			"region": schema.StringAttribute{
 				Required:            true,
 				MarkdownDescription: "The region the server is located in",
@@ -66,14 +73,22 @@ func (c *ComputeInstanceResource) Schema(ctx context.Context, req resource.Schem
 			"image_id": schema.StringAttribute{
 				Required: true,
 			},
-			//"tags": schema.ListAttribute{
-			//	Optional:    true,
-			//	ElementType: basetypes.StringType{},
-			//},
+			"tags": schema.ListAttribute{
+				Optional:    true,
+				ElementType: basetypes.StringType{},
+			},
 			"ip_addresses": schema.ListAttribute{
 				Computed:            true,
 				MarkdownDescription: "The IP addresses assigned to the server",
 				ElementType:         basetypes.StringType{},
+			},
+			"ssh_key_ids": schema.ListAttribute{
+				Required:    true,
+				ElementType: basetypes.Int64Type{},
+			},
+			"boot_size": schema.Int64Attribute{
+				Required:            true,
+				MarkdownDescription: "The size of the boot volume in GB",
 			},
 		},
 	}
@@ -105,7 +120,20 @@ func (c *ComputeInstanceResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	params := tsw.InstanceCreateRequest{}
+	params := tsw.InstanceCreateRequest{
+		DisplayName: data.DisplayName.ValueString(),
+		RegionId:    data.Region.ValueString(),
+		TierId:      data.TierId.ValueString(),
+		ImageId:     data.ImageId.ValueString(),
+		BootSize:    int(data.BootSize.ValueInt64()),
+	}
+	resp.Diagnostics.Append(data.SshKeyIds.ElementsAs(context.Background(), &params.SshKeyIds, false)...)
+	resp.Diagnostics.Append(data.Tags.ElementsAs(context.Background(), &params.Tags, false)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	instance, err := c.client.CreateInstance(ctx, &params)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create instance, got error: %s", err))

@@ -46,9 +46,9 @@ type InstanceCreateRequest struct {
 	RegionId    string   `json:"regionId"`
 	TierId      string   `json:"tierId"`
 	ImageId     string   `json:"imageId"`
-	SshKeyIds   []uint64 `json:"sshKeyIds"`
+	SshKeyIds   []uint64 `json:"sshKeyIds,omitempty"`
 	BootSize    int      `json:"bootSize,omitempty"`
-	Tags        []string `json:"tags"`
+	Tags        []string `json:"tags,omitempty"`
 }
 
 func (c *Client) GetInstance(ctx context.Context, id int64) (*Instance, error) {
@@ -64,7 +64,7 @@ func (c *Client) GetInstance(ctx context.Context, id int64) (*Instance, error) {
 	}
 	_, err = c.doForJson(req, &result)
 	if result.Result == nil {
-		return nil, fmt.Errorf("unable to get ssh key")
+		return nil, fmt.Errorf("unable to get instance")
 	}
 	return result.Result, err
 }
@@ -84,11 +84,16 @@ func (c *Client) CreateInstance(ctx context.Context, params *InstanceCreateReque
 	req.Header.Set("content-type", "application/json")
 
 	var result struct {
-		Result *Instance `json:"result"`
+		Success bool      `json:"success"`
+		Result  *Instance `json:"result"`
+		Message string    `json:"message"`
 	}
 	_, err = c.doForJson(req, &result)
-	if result.Result == nil {
-		return nil, fmt.Errorf("unable to get ssh key")
+	if err != nil {
+		return nil, err
+	}
+	if result.Result == nil || !result.Success {
+		return nil, fmt.Errorf("unable to create instance (%s)", result.Message)
 	}
 	return result.Result, err
 }
