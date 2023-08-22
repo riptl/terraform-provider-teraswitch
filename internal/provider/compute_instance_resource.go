@@ -192,8 +192,7 @@ func (c *ComputeInstanceResource) Read(ctx context.Context, req resource.ReadReq
 }
 
 func (c *ComputeInstanceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//TODO implement me
-	panic("implement me")
+	resp.Diagnostics.AddError("Provider Error", "Sorry, support for updating cloud instances is not yet implemented")
 }
 
 func (c *ComputeInstanceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

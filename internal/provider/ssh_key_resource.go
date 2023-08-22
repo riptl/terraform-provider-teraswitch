@@ -138,8 +138,7 @@ func (s *SshKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 }
 
 func (s *SshKeyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//TODO implement me
-	panic("implement me")
+	resp.Diagnostics.AddError("Provider Error", "Sorry, support for updating SSH keys is not yet implemented")
 }
 
 func (s *SshKeyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
