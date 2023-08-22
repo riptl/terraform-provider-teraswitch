@@ -102,3 +102,22 @@ func (c *Client) CreateInstance(ctx context.Context, params *InstanceCreateReque
 	}
 	return result.Result, err
 }
+
+func (c *Client) DestroyInstance(ctx context.Context, id int64) error {
+	uri := c.baseURL + "/v2/Instance/" + strconv.FormatInt(id, 10)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, uri, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("authorization", "Bearer "+c.token)
+
+	var result struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}
+	_, err = c.doForJson(req, &result)
+	if !result.Success {
+		return fmt.Errorf("unable to destroy instance: %s", result.Message)
+	}
+	return nil
+}

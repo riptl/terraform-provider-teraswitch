@@ -67,7 +67,7 @@ func (c *Client) CreateSshKey(ctx context.Context, params *SshKeyCreateRequest) 
 }
 
 // TODO: TeraSwitch API doesn't properly support DELETE
-func (c *Client) DeleteSshKey(ctx context.Context, projectId, id int64) error {
+func (c *Client) DeleteSshKey(ctx context.Context, id int64) error {
 	uri := fmt.Sprintf("%s/v1/SSHKey/%d", c.baseURL, id)
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, uri, nil)
 	if err != nil {

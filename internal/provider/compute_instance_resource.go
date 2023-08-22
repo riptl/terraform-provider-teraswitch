@@ -176,7 +176,6 @@ func (c *ComputeInstanceResource) Read(ctx context.Context, req resource.ReadReq
 
 	// Read Terraform state into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -198,8 +197,21 @@ func (c *ComputeInstanceResource) Update(ctx context.Context, req resource.Updat
 }
 
 func (c *ComputeInstanceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	//TODO implement me
-	panic("implement me")
+	var data ComputeInstanceModel
+
+	// Read Terraform state into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	err := c.client.DestroyInstance(ctx, data.Id.ValueInt64())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to destroy instance, got error: %s", err))
+		return
+	}
+
+	resp.State.RemoveResource(ctx)
 }
 
 func (c *ComputeInstanceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

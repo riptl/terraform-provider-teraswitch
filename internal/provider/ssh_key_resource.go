@@ -152,11 +152,13 @@ func (s *SshKeyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	err := s.client.DeleteSshKey(ctx, data.ProjectId.ValueInt64(), data.Id.ValueInt64())
+	err := s.client.DeleteSshKey(ctx, data.Id.ValueInt64())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete SSH key, got error: %s", err))
 		return
 	}
+
+	resp.State.RemoveResource(ctx)
 }
 
 func (s *SshKeyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
