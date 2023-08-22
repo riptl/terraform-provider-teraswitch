@@ -9,6 +9,11 @@ import (
 	"strconv"
 )
 
+const (
+	PowerStateOn  string = "On"
+	PowerStateOff string = "off"
+)
+
 type Instance struct {
 	Id          int64        `json:"id"`
 	ObjectType  string       `json:"objectType"`

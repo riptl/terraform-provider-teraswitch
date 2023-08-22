@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -141,6 +142,28 @@ func (c *ComputeInstanceResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	data.copyFromApi(instance, resp.Diagnostics)
+
+	tflog.Trace(ctx, "sent instance creation request, polling ...")
+
+	// TODO add configurable polling interval
+	ticker := time.NewTicker(1 * time.Second)
+waitForStartup:
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			instance, err := c.client.GetInstance(ctx, data.Id.ValueInt64())
+			if err != nil {
+				resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to get instance, got error: %s", err))
+				return
+			}
+			if instance.PowerState == tsw.PowerStateOn {
+				tflog.Trace(ctx, "instance is reporting power state on")
+				break waitForStartup
+			}
+		}
+	}
 
 	tflog.Trace(ctx, "created instance")
 
